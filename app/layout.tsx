@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
   title: "JSON to TypeScript Interfaces Converter | Online Tool",
@@ -42,6 +43,7 @@ export default function RootLayout({
       </head>
       <body>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">{children}</div>
+        <Analytics />
       </body>
     </html>
   );
