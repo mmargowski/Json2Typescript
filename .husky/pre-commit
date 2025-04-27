@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "Running pre-commit hooks..."
+
+echo "Running linting checks..."
+npm run lint || {
+  echo "❌ Linting failed! Please fix the above errors before committing."
+  exit 1
+}
+
+echo "Running build process to verify application builds properly..."
+npm run build || {
+  echo "❌ Build failed! Please fix the above errors before committing."
+  exit 1
+}
+
+echo "✅ All checks passed! Proceeding with commit."
