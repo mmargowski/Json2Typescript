@@ -2,6 +2,7 @@ import {
   TextareaWithButton,
   TextareaDisabled,
 } from "@/components/ui/JsonToTS/textarea";
+import { Suspense } from "react";
 
 export default function Home() {
   return (
@@ -69,7 +70,9 @@ export default function Home() {
               <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
               <h2 className="text-sm font-medium text-slate-500">input.json</h2>
             </div>
-            <TextareaWithButton />
+            <Suspense fallback={<div>Loading input...</div>}>
+              <TextareaWithButton />
+            </Suspense>
           </div>
 
           {/* Right column: Output */}
@@ -82,7 +85,9 @@ export default function Home() {
                 interfaces.ts
               </h2>
             </div>
-            <TextareaDisabled />
+            <Suspense fallback={<div>Loading interfaces...</div>}>
+              <TextareaDisabled />
+            </Suspense>
           </div>
         </div>
       </div>
