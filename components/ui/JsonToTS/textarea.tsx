@@ -26,11 +26,27 @@ function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
 
 function TextareaWithButton() {
   const [content, setContent] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  const formatJsonError = (error: Error, jsonString: string): string => {
+    if (error instanceof SyntaxError) {
+      const match = error.message.match(/position (\d+)/);
+      if (match && match[1]) {
+        const position = parseInt(match[1], 10);
+        const lines = jsonString.slice(0, position).split("\n");
+        const line = lines.length;
+        const column = lines[lines.length - 1].length + 1;
+        return `JSON Syntax Error at line ${line}, column ${column}: ${error.message}`;
+      }
+    }
+    return `Invalid JSON format: ${error.message}`;
+  };
+
   const handleClick = () => {
+    setError(null);
     try {
       const json = JSON.parse(content);
       const generatedInterfaces = JsonToTS(json);
@@ -46,12 +62,17 @@ function TextareaWithButton() {
       setContent("");
     } catch (error) {
       console.error("Error parsing JSON:", error);
-      alert("Invalid JSON format. Please check your input.");
+      if (error instanceof Error) {
+        setError(formatJsonError(error, content));
+      } else {
+        setError("Invalid JSON format. Please check your input.");
+      }
     }
   };
 
   const reset = () => {
     setContent("");
+    setError(null);
     const params = new URLSearchParams(searchParams.toString());
     params.delete("interfaces");
     router.push(`?${params.toString()}`, { scroll: false });
@@ -75,11 +96,25 @@ function TextareaWithButton() {
   }
 }`}
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e) => {
+            setContent(e.target.value);
+            if (error) setError(null);
+          }}
           spellCheck="false"
-          className="text-slate-800 bg-slate-50 border-slate-200 h-[240px] resize-none focus:ring-blue-600/25"
+          className={cn(
+            "text-slate-800 bg-slate-50 border-slate-200 h-[240px] resize-none focus:ring-blue-600/25",
+            error && "border-red-300 focus:ring-red-200"
+          )}
         />
       </div>
+
+      {error && (
+        <div className="text-red-500 text-xs bg-red-50 p-2 rounded-md border border-red-200">
+          <p className="font-medium mb-1">Error</p>
+          <p className="font-mono">{error}</p>
+        </div>
+      )}
+
       <div className="flex gap-2">
         <Button
           onClick={handleClick}
@@ -91,7 +126,9 @@ function TextareaWithButton() {
         <Button
           variant="destructive"
           onClick={reset}
-          disabled={!content.trim() && !searchParams.has("interfaces")}
+          disabled={
+            !content.trim() && !searchParams.has("interfaces") && !error
+          }
         >
           Reset
         </Button>
@@ -126,7 +163,7 @@ function TextareaDisabled() {
 
   return (
     <div className="relative">
-      <div className="bg-slate-50 rounded-md overflow-auto max-h-[240px] w-full text-sm font-mono border border-slate-200">
+      <div className="bg-slate-50 rounded-md w-full text-sm font-mono border border-slate-200">
         {formattedInterfaces ? (
           <SyntaxHighlighter
             language="typescript"
@@ -134,16 +171,16 @@ function TextareaDisabled() {
             customStyle={{
               margin: 0,
               padding: "12px",
-              minHeight: "240px",
-              maxHeight: "240px",
+              height: "240px",
               borderRadius: "0.375rem",
               background: "#F8FAFC",
+              overflow: "auto",
             }}
           >
             {formattedInterfaces}
           </SyntaxHighlighter>
         ) : (
-          <div className="p-3 text-slate-400 min-h-[240px] flex items-center justify-center">
+          <div className="p-3 text-slate-400 h-[240px] flex items-center justify-center">
             TypeScript interfaces will appear here.
           </div>
         )}
