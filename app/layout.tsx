@@ -21,13 +21,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://json-to-ts.vercel.app/", // Replace with your actual URL
+    url: process.env.VERCEL_URL || "",
     title: "JSON to TypeScript Interfaces Converter",
     description:
       "Free online tool to convert JSON to TypeScript interfaces instantly",
     siteName: "JSON to TypeScript Converter",
   },
-  metadataBase: new URL("https://json-to-ts.vercel.app/"), // Replace with your actual URL
+  metadataBase: new URL(process.env.VERCEL_URL || "www.example.com"),
   category: "Developer Tools",
 };
 
@@ -41,7 +41,7 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#ffffff" />
-        <link rel="canonical" href="https://json-to-ts.vercel.app/" />
+        <link rel="canonical" href={process.env.VERCEL_URL || ""} />
       </head>
       <body>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">{children}</div>
